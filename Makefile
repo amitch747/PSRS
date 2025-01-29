@@ -1,7 +1,7 @@
 all: PSRS
 
-PSRS: PSRS.cc
-	g++ -std=c++20 -o PSRS PSRS.cc
+PSRS: PSRS.cpp
+	g++ -std=c++20 -o PSRS PSRS.cpp
 
 clean:
 	rm -f PSRS

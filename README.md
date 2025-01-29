@@ -1,8 +1,6 @@
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Name : Aiden Mitchell
 # SID : 1658859
 # CCID : aiden2
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 
@@ -18,6 +16,6 @@
 
 
 # - - - - - - - - - - - S O U R C E S - - - - - - - - - - -
-# Random number generation - https://www.youtube.com/watch?v=-NA_B_vJP14&t=5s&ab_channel=ProfessorHankStalica
-# More random generation - https://www.youtube.com/watch?v=oW6iuFbwPDg&ab_channel=TheBuilder
+Random number generation  - https://www.youtube.com/watch?v=oW6iuFbwPDg&ab_channel=TheBuilder
+Time of day - https://man7.org/linux/man-pages/man2/settimeofday.2.html
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
