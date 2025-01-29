@@ -2,8 +2,10 @@
 #include <iostream>
 #include <stdlib.h>
 
+#include <ranges>
 #include <vector>
 #include <random>
+#include <algorithm>
 
 int main(int argc, char* argv[]) 
 {
@@ -18,6 +20,7 @@ int main(int argc, char* argv[])
     std::vector<int> v(atoi(argv[1]));
     std::random_device rd;
     std::iota(v.begin(), v.end(), 0);
+    std::ranges::shuffle(v,rd);
     for (auto i : v)
     {
         std::cout << i << " ";
