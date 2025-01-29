@@ -39,7 +39,9 @@ int main(int argc, char* argv[])
 
     //Then the threads
 
- 
+    // Plan for tmrw: 
+    // Use paper to set up all possible variables I'll need.
+    // Figure out Pthreads. Creating, assigning jobs, barrier syncs, and joining at the end. 
 
 
     // Phase One: Sort Local Data
