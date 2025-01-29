@@ -53,6 +53,14 @@ int main(int argc, char* argv[])
 
     // Get end time
     gettimeofday(&tv2, &tz2);
-    std::cout << "Execution time: " << tv2.tv_sec - tv1.tv_sec << " seconds and "<< tv2.tv_usec - tv1.tv_usec  << " microseconds" << std::endl;
+    long sec = tv2.tv_sec - tv1.tv_sec;
+    long msec = tv2.tv_usec - tv1.tv_usec;
+    //Case where msec is negative, need to fix up
+    if (msec < 0) 
+    {
+        sec = sec -1;
+        msec = msec + 1000000;
+    }
+    std::cout << "Execution time: " << sec << " seconds and "<< msec  << " microseconds" << std::endl;
     return 0;
 }
