@@ -68,73 +68,44 @@ int main(int argc, char* argv[])
     std::ranges::shuffle(a0, a0+n, rd);
     std::cout << "Phase 0 array:" << std::endl;
     for (int i = 0; i < n; ++i){
-        std::cout << a0[i] << " ";
+       // std::cout << a0[i] << " ";
     }
     std::cout << std::endl;
 
     int** blocks = new int*[p];
     size_t * blockSizes = new size_t[p]; // may as well do this now, instead of in the parallel portions
-    int key = 0;
-    for (int i = 0; i < p; ++i) {
-        int currentPartSize = blockSize + (i < remainder ? 1 : 0);  // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
-        blockSizes[i] = currentPartSize; // Set size of block
-        blocks[i] = new int[currentPartSize]; // Create block on heap
-        for (int j = 0; j < currentPartSize; ++j) {
-                blocks[i][j] = a0[key++];
-        }
-    }
 
-     for (int i = 0; i < p; ++i) {
-        std::cout << "Subarray " << i + 1 << " Size: [" << blockSizes[i] << "]: ";
-        for (size_t j = 0; j < blockSizes[i]; ++j) {
-            std::cout << blocks[i][j] << " ";
-        }
-        std::cout << std::endl;
-     }
-     
-    // std::vector<int> v0(atoi(argv[1]));
-    // std::random_device rd;
-    // std::iota(v0.begin(), v0.end(), 0);
-    // std::ranges::shuffle(v0,rd);
-    // std::cout << "Phase 0 list:" << std::endl;
-    // for (auto i : v0){
-    //     std::cout << i << " ";
-    // }
-    // std::cout << std::endl;
-    // std::vector<std::vector<int>> blocks(p); //Global vector to hold blocks. Vector of int vectors.
-    // int remainder = n % p;
-    // std::cout << remainder << std::endl;
-    // int key = 0;
-    //     for (int i = 0; i < p; ++i) {
-    //         int currentPartSize = blockSize + (i < remainder ? 1 : 0);     // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
-    //         for (int j = 0; j < currentPartSize; ++j) {
-    //             blocks[i].push_back(v0[key++]);
-    //         }
+
+    //  for (int i = 0; i < p; ++i) {
+    //     std::cout << "Subarray " << i + 1 << " Size: [" << blockSizes[i] << "]: ";
+    //     for (size_t j = 0; j < blockSizes[i]; ++j) {
+    //        // std::cout << blocks[i][j] << " ";
     //     }
-
-    //     // Print the splits
-    //     for (int i = 0; i < p; ++i) {
-    //         std::cout << "Subarray " << i + 1 << "Size: [" << blocks[i].size() << "]" << ": ";
-    //         for (int val : blocks[i]) {
-    //             std::cout << val << " ";
-    //         }
-    //         std::cout << std::endl;
-    //     }
-
-
+    //     std::cout << std::endl;
+    //  }
 
 
 
     pthread_t threads[p];
     pthread_barrier_init(&bar1, NULL, p);
-    for (int i = 0; i < p; i++) {
-        // Each local block should be created here
 
+    int key = 0;
+    for (int i = 0; i < p; i++) {
+
+        for (int i = 0; i < p; ++i) {
+            int currentPartSize = blockSize + (i < remainder ? 1 : 0);  // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
+            blockSizes[i] = currentPartSize; // Set size of block
+            blocks[i] = new int[currentPartSize]; // Create block on heap
+            for (int j = 0; j < currentPartSize; ++j) {
+                blocks[i][j] = a0[key++];
+            }
+        }
 
         if (pthread_create(&threads[i], NULL, &phaseOne, NULL) != 0) {
             perror("Failed to CREATE a thread for phaseOne job");
         }
     }
+
     for (int i = 0; i < p; i++) {
     if (pthread_join(threads[i], NULL) != 0) {
         perror("Failed to JOIN a thread after phaseOne job");
@@ -193,7 +164,7 @@ int main(int argc, char* argv[])
     }
     std::cout << "\nPhase 5 list:" << std::endl;
     for (int i = 0; i < n; ++i){
-        std::cout << a0[i] << " ";
+       // std::cout << a0[i] << " ";
     }
     std::cout << std::endl;
     std::cout << "\nExecution time: " << sec << " seconds and "<< msec  << " microseconds" << std::endl;
