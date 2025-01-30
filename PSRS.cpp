@@ -11,6 +11,7 @@
 
 #include <cmath>
 
+
 pthread_barrier_t bar1;
 pthread_barrier_t bar2;
 pthread_barrier_t bar3;
@@ -26,8 +27,10 @@ int quickCompare(const void* x, const void* y)
 	return 0;
 }
 
-void* phaseOne(void* nothing)
+void* phaseOne(void* arg)
 {
+    int* localBlock = static_cast<int*>(arg);
+    qsort(localBlock, (sizeof(localBlock)/sizeof(localBlock[0])), sizeof(localBlock[0]), quickCompare);
     std::cout<< "Barrier wait" << std::endl;
     pthread_barrier_wait(&bar1);
     std::cout<< "Barrier passed" << std::endl;
@@ -67,14 +70,30 @@ int main(int argc, char* argv[])
     std::ranges::shuffle(v0,rd);
     std::cout << "Phase 0 list:" << std::endl;
     for (auto i : v0){
-        //std::cout << i << " ";
+        std::cout << i << " ";
     }
+    std::cout << std::endl;
+    std::vector<std::vector<int>> blocks(p); //Global vector to hold blocks. Vector of int vectors.
+    int remainder = n % p;
+    std::cout << remainder << std::endl;
+    int key = 0;
+        for (int i = 0; i < p; ++i) {
+            int currentPartSize = blockSize + (i < remainder ? 1 : 0);     // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
+            for (int j = 0; j < currentPartSize; ++j) {
+                blocks[i].push_back(v0[key++]);
+            }
+        }
 
-    //int* a0 = &v0[0]; // Convert to array ;
+        // Print the splits
+        for (int i = 0; i < p; ++i) {
+            std::cout << "Subarray " << i + 1 << "Size: [" << blocks[i].size() << "]" << ": ";
+            for (int val : blocks[i]) {
+                std::cout << val << " ";
+            }
+            std::cout << std::endl;
+        }
 
 
-    //Global vector to hold partitions. Vector of int vectors.
-    std::vector<std::vector<int>> 
 
 
 
@@ -84,7 +103,7 @@ int main(int argc, char* argv[])
         // Each local block should be created here
 
 
-        if (pthread_create(&threads[i], NULL, &phaseOne, NULL) != 0) {
+        if (pthread_create(&threads[i], NULL, &phaseOne, &blocks[i]) != 0) {
             perror("Failed to CREATE a thread for phaseOne job");
         }
     }
@@ -96,7 +115,14 @@ int main(int argc, char* argv[])
     }
 
     pthread_barrier_destroy(&bar1);
-
+        // Print the splits
+        for (int i = 0; i < p; ++i) {
+            std::cout << "Subarray " << i + 1 << "Size: [" << blocks[i].size() << "]" << ": ";
+            for (int val : blocks[i]) {
+                std::cout << val << " ";
+            }
+            std::cout << std::endl;
+        }
     //Then the threads
 
     // Plan for tmrw: 
