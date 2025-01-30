@@ -49,4 +49,6 @@ For splitting the array I think I can do a recursive function. We'll see.
 
 Looking at my 379 multithreading code I've realized I can just use a struct as the input arg for pthread_create
 Saves me alot of trouble
+
+Memory is looking rough
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

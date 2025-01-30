@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
         }
     }
 
-       int* RegSamples = new int[p];
+       int* RegSamples = new int[pSq];
 
 
     for (int i = 0; i < p; i++) {
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
     //     delete[] blocks[i];
     // }
     //delete[] blocks;
-    delete[] blockSizes;
+    //delete[] blockSizes;
     //delete[] RegSamples;
     int* pivots = new int[p];
     int piv = p;
