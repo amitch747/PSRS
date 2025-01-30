@@ -11,6 +11,10 @@
 
 #include <cmath>
 
+pthread_barrier_t bar1;
+pthread_barrier_t bar2;
+pthread_barrier_t bar3;
+pthread_barrier_t bar4;
 
 int quickCompare(const void* x, const void* y)
 {
@@ -22,6 +26,13 @@ int quickCompare(const void* x, const void* y)
 	return 0;
 }
 
+void* phaseOne(void* nothing)
+{
+    std::cout<< "Barrier wait" << std::endl;
+    pthread_barrier_wait(&bar1);
+    std::cout<< "Barrier passed" << std::endl;
+    return NULL;
+}
 
 
 
@@ -59,11 +70,32 @@ int main(int argc, char* argv[])
         //std::cout << i << " ";
     }
 
-    int* a0 = &v0[0]; // Convert to array ;
+    //int* a0 = &v0[0]; // Convert to array ;
+
+
+    //Global vector to hold partitions. Vector of int vectors.
+    std::vector<std::vector<int>> 
 
 
 
-    
+    pthread_t threads[p];
+    pthread_barrier_init(&bar1, NULL, p);
+    for (int i = 0; i < p; i++) {
+        // Each local block should be created here
+
+
+        if (pthread_create(&threads[i], NULL, &phaseOne, NULL) != 0) {
+            perror("Failed to CREATE a thread for phaseOne job");
+        }
+    }
+    for (int i = 0; i < p; i++) {
+    if (pthread_join(threads[i], NULL) != 0) {
+        perror("Failed to JOIN a thread after phaseOne job");
+    }
+
+    }
+
+    pthread_barrier_destroy(&bar1);
 
     //Then the threads
 
