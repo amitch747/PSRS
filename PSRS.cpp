@@ -29,8 +29,8 @@ int quickCompare(const void* x, const void* y)
 
 void* phaseOne(void* arg)
 {
-    int* localBlock = static_cast<int*>(arg);
-    qsort(localBlock, (sizeof(localBlock)/sizeof(localBlock[0])), sizeof(localBlock[0]), quickCompare);
+    //int* localBlock = static_cast<int*>(arg);
+    //qsort(localBlock, (sizeof(localBlock)/sizeof(localBlock[0])), sizeof(localBlock[0]), quickCompare);
     std::cout<< "Barrier wait" << std::endl;
     pthread_barrier_wait(&bar1);
     std::cout<< "Barrier passed" << std::endl;
@@ -64,34 +64,47 @@ int main(int argc, char* argv[])
 
 
     //First need to create the array
-    std::vector<int> v0(atoi(argv[1]));
+    int* a0 = new int[n];
     std::random_device rd;
-    std::iota(v0.begin(), v0.end(), 0);
-    std::ranges::shuffle(v0,rd);
-    std::cout << "Phase 0 list:" << std::endl;
-    for (auto i : v0){
-        std::cout << i << " ";
+    std::iota(a0, a0 +n, 0);
+    std::ranges::shuffle(a0, a0+n, rd);
+    std::cout << "Phase 0 array:" << std::endl;
+    for (int i = 0; i < n; ++i){
+        std::cout << a0[i] << " ";
     }
     std::cout << std::endl;
-    std::vector<std::vector<int>> blocks(p); //Global vector to hold blocks. Vector of int vectors.
-    int remainder = n % p;
-    std::cout << remainder << std::endl;
-    int key = 0;
-        for (int i = 0; i < p; ++i) {
-            int currentPartSize = blockSize + (i < remainder ? 1 : 0);     // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
-            for (int j = 0; j < currentPartSize; ++j) {
-                blocks[i].push_back(v0[key++]);
-            }
-        }
 
-        // Print the splits
-        for (int i = 0; i < p; ++i) {
-            std::cout << "Subarray " << i + 1 << "Size: [" << blocks[i].size() << "]" << ": ";
-            for (int val : blocks[i]) {
-                std::cout << val << " ";
-            }
-            std::cout << std::endl;
-        }
+
+
+
+    // std::vector<int> v0(atoi(argv[1]));
+    // std::random_device rd;
+    // std::iota(v0.begin(), v0.end(), 0);
+    // std::ranges::shuffle(v0,rd);
+    // std::cout << "Phase 0 list:" << std::endl;
+    // for (auto i : v0){
+    //     std::cout << i << " ";
+    // }
+    // std::cout << std::endl;
+    // std::vector<std::vector<int>> blocks(p); //Global vector to hold blocks. Vector of int vectors.
+    // int remainder = n % p;
+    // std::cout << remainder << std::endl;
+    // int key = 0;
+    //     for (int i = 0; i < p; ++i) {
+    //         int currentPartSize = blockSize + (i < remainder ? 1 : 0);     // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
+    //         for (int j = 0; j < currentPartSize; ++j) {
+    //             blocks[i].push_back(v0[key++]);
+    //         }
+    //     }
+
+    //     // Print the splits
+    //     for (int i = 0; i < p; ++i) {
+    //         std::cout << "Subarray " << i + 1 << "Size: [" << blocks[i].size() << "]" << ": ";
+    //         for (int val : blocks[i]) {
+    //             std::cout << val << " ";
+    //         }
+    //         std::cout << std::endl;
+    //     }
 
 
 
@@ -103,7 +116,7 @@ int main(int argc, char* argv[])
         // Each local block should be created here
 
 
-        if (pthread_create(&threads[i], NULL, &phaseOne, &blocks[i]) != 0) {
+        if (pthread_create(&threads[i], NULL, &phaseOne, NULL) != 0) {
             perror("Failed to CREATE a thread for phaseOne job");
         }
     }
@@ -115,14 +128,7 @@ int main(int argc, char* argv[])
     }
 
     pthread_barrier_destroy(&bar1);
-        // Print the splits
-        for (int i = 0; i < p; ++i) {
-            std::cout << "Subarray " << i + 1 << "Size: [" << blocks[i].size() << "]" << ": ";
-            for (int val : blocks[i]) {
-                std::cout << val << " ";
-            }
-            std::cout << std::endl;
-        }
+
     //Then the threads
 
     // Plan for tmrw: 
@@ -171,9 +177,10 @@ int main(int argc, char* argv[])
         msec = msec + 1000000;
     }
     std::cout << "\nPhase 5 list:" << std::endl;
-    for (auto i : v0){
-        std::cout << i << " ";
+    for (int i = 0; i < n; ++i){
+        std::cout << a0[i] << " ";
     }
+    std::cout << std::endl;
     std::cout << "\nExecution time: " << sec << " seconds and "<< msec  << " microseconds" << std::endl;
     return 0;
 }
