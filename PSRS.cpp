@@ -1,3 +1,5 @@
+#include "PSRS.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <stdlib.h>
@@ -29,7 +31,10 @@ int quickCompare(const void* x, const void* y)
 
 void* phaseOne(void* arg)
 {
-    //int* localBlock = static_cast<int*>(arg);
+    phaseOneStruct* p1 = static_cast<phaseOneStruct*>(arg);
+    int* localBlock = p1->block;
+    size_t blockSize = p1->size;
+    std::cout << "LocalBlock 1st element: " << *localBlock << ". List has size [" << blockSize << "]" << std::endl;
     //qsort(localBlock, (sizeof(localBlock)/sizeof(localBlock[0])), sizeof(localBlock[0]), quickCompare);
     std::cout<< "Barrier wait" << std::endl;
     pthread_barrier_wait(&bar1);
@@ -92,16 +97,15 @@ int main(int argc, char* argv[])
     int key = 0;
     for (int i = 0; i < p; i++) {
 
-        for (int i = 0; i < p; ++i) {
-            int currentPartSize = blockSize + (i < remainder ? 1 : 0);  // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
-            blockSizes[i] = currentPartSize; // Set size of block
-            blocks[i] = new int[currentPartSize]; // Create block on heap
-            for (int j = 0; j < currentPartSize; ++j) {
-                blocks[i][j] = a0[key++];
-            }
-        }
+      
+        int currentPartSize = blockSize + (i < remainder ? 1 : 0);  // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
+        blockSizes[i] = currentPartSize; // Set size of block
+        blocks[i] = new int[currentPartSize]; // Create block on heap
+        for (int j = 0; j < currentPartSize; ++j) {blocks[i][j] = a0[key++];}
 
-        if (pthread_create(&threads[i], NULL, &phaseOne, NULL) != 0) {
+        phaseOneStruct* p1 = new phaseOneStruct(blocks[i], blockSizes[i]); // Data available for each thread
+
+        if (pthread_create(&threads[i], NULL, &phaseOne, p1) != 0) {
             perror("Failed to CREATE a thread for phaseOne job");
         }
     }

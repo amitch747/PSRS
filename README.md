@@ -46,4 +46,7 @@ Yeah I'm just gunna use create,join, and barriers. I don't see a reason to overc
 
 
 For splitting the array I think I can do a recursive function. We'll see.
+
+Looking at my 379 multithreading code I've realized I can just use a struct as the input arg for pthread_create
+Saves me alot of trouble
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
