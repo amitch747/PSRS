@@ -34,12 +34,34 @@ void* phaseOne(void* arg)
     phaseOneStruct* p1 = static_cast<phaseOneStruct*>(arg);
     int* localBlock = p1->block;
     size_t blockSize = p1->size;
+    int w = p1->w;
+    int p = p1->p;
+    int pSq = p1->pSq;
     std::cout << "LocalBlock 1st element: " << *localBlock << ". List has size [" << blockSize << "]" << std::endl;
-    //qsort(localBlock, (sizeof(localBlock)/sizeof(localBlock[0])), sizeof(localBlock[0]), quickCompare);
+    qsort(localBlock, blockSize, sizeof(int), quickCompare);
+
+    for (size_t i = 0; i < blockSize; ++i) {
+        std::cout << localBlock[i] << " ";
+    }
+    std::cout << " of size [" << blockSize << "]" << std::endl;
+
+    int* tempRegSamples = new int[p];
+
+    //Each sorted list will "select data items at local indices 1, w+1, 2w+1, ... , (p-1)w+1"
+    int k = 0;
+    for (int i = 0; i<p; i++) {
+        tempRegSamples[i] = localBlock[k];
+        k+=w;
+    }
+
+    for (int i = 0; i < p; ++i) {
+        std::cout << tempRegSamples[i] << " ";
+    }
+    std::cout << std::endl;
     std::cout<< "Barrier wait" << std::endl;
     pthread_barrier_wait(&bar1);
     std::cout<< "Barrier passed" << std::endl;
-    return NULL;
+    return tempRegSamples;
 }
 
 
@@ -61,10 +83,12 @@ int main(int argc, char* argv[])
     // Set up variables
     int n = atoi(argv[1]); // Size of list
     int p = atoi(argv[2]); // Number of processors (threads)
+    int pSq = (int)pow(p,2);
     int rho = p/2; // ???
-    int w = n/(pow(p,2)); // ???
+    int w = n/pSq; // ???
     int blockSize = n/p; // Blocksize for Phase1
     int remainder = n % p; // Used to fill up blocks up to n%p with an extra key
+
 
     //First need to create the array
     int* a0 = new int[n];
@@ -77,20 +101,9 @@ int main(int argc, char* argv[])
     }
     std::cout << std::endl;
 
+    // Needed info for Phase 1
     int** blocks = new int*[p];
     size_t * blockSizes = new size_t[p]; // may as well do this now, instead of in the parallel portions
-
-
-    //  for (int i = 0; i < p; ++i) {
-    //     std::cout << "Subarray " << i + 1 << " Size: [" << blockSizes[i] << "]: ";
-    //     for (size_t j = 0; j < blockSizes[i]; ++j) {
-    //        // std::cout << blocks[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    //  }
-
-
-
     pthread_t threads[p];
     pthread_barrier_init(&bar1, NULL, p);
 
@@ -103,21 +116,78 @@ int main(int argc, char* argv[])
         blocks[i] = new int[currentPartSize]; // Create block on heap
         for (int j = 0; j < currentPartSize; ++j) {blocks[i][j] = a0[key++];}
 
-        phaseOneStruct* p1 = new phaseOneStruct(blocks[i], blockSizes[i]); // Data available for each thread
+        phaseOneStruct* p1 = new phaseOneStruct(blocks[i], blockSizes[i], w, p ,pSq); // Data available for each thread
 
         if (pthread_create(&threads[i], NULL, &phaseOne, p1) != 0) {
             perror("Failed to CREATE a thread for phaseOne job");
         }
     }
 
+       int* RegSamples = new int[p];
+
+
     for (int i = 0; i < p; i++) {
-    if (pthread_join(threads[i], NULL) != 0) {
-        perror("Failed to JOIN a thread after phaseOne job");
+        int* tempRegSamp;
+        if (pthread_join(threads[i], (void**)&tempRegSamp) != 0) {
+            perror("Failed to JOIN a thread after phaseOne job");
+        }
+        std::cout << "Regular sample [" << "i" << "] ";
+        for (int y = 0; y < p; ++y) {
+            std::cout << tempRegSamp[y] << " ";
+            RegSamples[i*3+y] = tempRegSamp[y];
+        }
+        std::cout << std::endl;
+
     }
 
+
+    for (int y = 0; y < pSq; ++y) {
+            std::cout << RegSamples[y] << " ";
+        }
+        std::cout << std::endl;
+
+    
+
+    for (int i = 0; i < p; ++i) {
+        std::cout << "Sorted Block" << i + 1 << " of size:[" << blockSizes[i] << "]: ";
+        for (size_t j = 0; j < blockSizes[i]; ++j) {
+            std::cout << blocks[i][j] << " ";
+        }
+        std::cout << std::endl;
     }
 
     pthread_barrier_destroy(&bar1);
+
+
+
+    qsort(RegSamples, pSq, sizeof(int), quickCompare);
+
+    for (int y = 0; y < pSq; ++y) {
+            std::cout << RegSamples[y] << " ";
+        }
+        std::cout << std::endl;
+
+    // delete[] a0;
+    // for (int i = 0; i < p; i++) {
+    //     delete[] blocks[i];
+    // }
+    //delete[] blocks;
+    delete[] blockSizes;
+    //delete[] RegSamples;
+    int* pivots = new int[p];
+    int piv = p;
+    int mult = 1;
+    for (int i = 0; i<p-1; i++) {
+        int index = ((piv*mult)+rho-1);
+
+        pivots[i] = RegSamples[index];
+        mult++;
+    }
+
+    for (int y = 0; y < p-1; ++y) {
+            std::cout << pivots[y] << " ";
+        }
+        std::cout << std::endl;
 
     //Then the threads
 

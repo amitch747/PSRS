@@ -14,4 +14,7 @@
 struct phaseOneStruct {
     int* block; // sub array to be quick sorted
     size_t size;
+    int w; 
+    int p; 
+    int pSq;
 };
