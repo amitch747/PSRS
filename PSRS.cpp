@@ -42,26 +42,24 @@ void* phaseOne(void* arg)
 
 int main(int argc, char* argv[]) 
 {
+    if(argc != 3) {  
+        std::cerr << "Command requires the number of array elements, and the number of processors (threads)\n";
+        return 1;
+    }
+
     struct timeval tv1;
     struct timezone tz1;
     struct timeval tv2;
     struct timezone tz2;
-    // Get start time
-    gettimeofday(&tv1, &tz1);
+    gettimeofday(&tv1, &tz1); // Get start time
 
-    if(argc != 3) 
-    {  
-        std::cerr << "ERROR\n";
-        std::cerr << "Command requires the number of array elements, and the number of processors (threads)\n";
-        return 1;
-    }
     // Set up variables
     int n = atoi(argv[1]); // Size of list
     int p = atoi(argv[2]); // Number of processors (threads)
     int rho = p/2; // ???
     int w = n/(pow(p,2)); // ???
     int blockSize = n/p; // Blocksize for Phase1
-
+    int remainder = n % p; // Used to fill up blocks up to n%p with an extra key
 
     //First need to create the array
     int* a0 = new int[n];
@@ -74,9 +72,26 @@ int main(int argc, char* argv[])
     }
     std::cout << std::endl;
 
+    int** blocks = new int*[p];
+    size_t * blockSizes = new size_t[p]; // may as well do this now, instead of in the parallel portions
+    int key = 0;
+    for (int i = 0; i < p; ++i) {
+        int currentPartSize = blockSize + (i < remainder ? 1 : 0);  // We deal with remaider by giving an extra key to each block under the size of the reaminder. 
+        blockSizes[i] = currentPartSize; // Set size of block
+        blocks[i] = new int[currentPartSize]; // Create block on heap
+        for (int j = 0; j < currentPartSize; ++j) {
+                blocks[i][j] = a0[key++];
+        }
+    }
 
-
-
+     for (int i = 0; i < p; ++i) {
+        std::cout << "Subarray " << i + 1 << " Size: [" << blockSizes[i] << "]: ";
+        for (size_t j = 0; j < blockSizes[i]; ++j) {
+            std::cout << blocks[i][j] << " ";
+        }
+        std::cout << std::endl;
+     }
+     
     // std::vector<int> v0(atoi(argv[1]));
     // std::random_device rd;
     // std::iota(v0.begin(), v0.end(), 0);
