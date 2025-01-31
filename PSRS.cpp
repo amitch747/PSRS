@@ -121,9 +121,9 @@ void* phaseThreeFour(void* arg) {
     }
 
 
-std::cout << "Thread " << threadID << " before barrier" << std::endl;
-int ret = pthread_barrier_wait(&bar3);
-std::cout << "Thread " << threadID << " after barrier" << std::endl;
+    std::cout << "Thread " << threadID << " before barrier" << std::endl;
+    int ret = pthread_barrier_wait(&bar3);
+    std::cout << "Thread " << threadID << " after barrier" << std::endl;
 
 
 
@@ -133,7 +133,6 @@ std::cout << "Thread " << threadID << " after barrier" << std::endl;
     {
         sharedBlockSize += sharedPartitionSizes[i][threadID];
     }
-    //std::cout << "Block size for thread[" << threadID << "]:" << sharedBlockSize << std::endl;
 
     int* assignedPartitions = new int[sharedBlockSize]; // Each thread will have a list of partitions (also lists)
     for(int i = 0; i < p; i++) {
@@ -144,9 +143,11 @@ std::cout << "Thread " << threadID << " after barrier" << std::endl;
     }
     assignedPartitions -= sharedBlockSize;
 
-    //qsort(assignedPartitions, sharedBlockSize, sizeof(int), quickCompare);
+    qsort(assignedPartitions, sharedBlockSize, sizeof(int), quickCompare);
 
     pthread_mutex_lock(&print_mutex);
+    std::cout << "Block size for thread[" << threadID << "]:" << sharedBlockSize << std::endl;
+
     for(int k =0 ; k<sharedBlockSize; k++)
     {
         std::cout << assignedPartitions[k] << " ";
@@ -308,7 +309,6 @@ int main(int argc, char* argv[])
             perror("Failed to CREATE a thread for phaseOne job");
         }
     }
-    pthread_barrier_destroy(&bar3);
 
     /*
     PHASE 4: Merge Partitions
@@ -334,6 +334,8 @@ int main(int argc, char* argv[])
 
 
     sleep(10);
+    pthread_barrier_destroy(&bar3);
+
     // Get end time
     gettimeofday(&tv2, &tz2);
     long sec = tv2.tv_sec - tv1.tv_sec;
