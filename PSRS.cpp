@@ -402,7 +402,6 @@ int main(int argc, char* argv[])
 
         std::copy(partition, partition + sharedBlockSize, outputArray.begin() + offset);
         offset += sharedBlockSize;
-        // Free the dynamically allocated memory since vector now owns the data
         delete[] partition;
     }   
 
