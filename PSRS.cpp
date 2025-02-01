@@ -38,9 +38,9 @@ void* phaseOne(void* arg)
     //std::cout << "LocalBlock 1st element: " << *localBlock << ". List has size [" << blockSize << "]" << std::endl;
     qsort(localBlock, blockSize, sizeof(int), quickCompare);
 
-    for (size_t i = 0; i < blockSize; ++i) {
-        //std::cout << localBlock[i] << " ";
-    }
+    // for (size_t i = 0; i < blockSize; ++i) {
+    //     //std::cout << localBlock[i] << " ";
+    // }
     //std::cout << " of size [" << blockSize << "]" << std::endl;
 
     int* tempRegSamples = new int[p];
@@ -56,9 +56,9 @@ void* phaseOne(void* arg)
        // std::cout << tempRegSamples[i] << " ";
     }
    // std::cout << std::endl;
-    std::cout<< "Barrier wait" << std::endl;
+    //std::cout<< "Barrier wait" << std::endl;
     pthread_barrier_wait(&bar1);
-    std::cout<< "Barrier passed" << std::endl;
+    //std::cout<< "Barrier passed" << std::endl;
     return tempRegSamples;
 }
 
@@ -121,9 +121,9 @@ void* phaseThreeFour(void* arg) {
     }
 
 
-    std::cout << "Thread " << threadID << " before barrier" << std::endl;
-    int ret = pthread_barrier_wait(&bar3);
-    std::cout << "Thread " << threadID << " after barrier" << std::endl;
+    //std::cout << "Thread " << threadID << " before barrier" << std::endl;
+    pthread_barrier_wait(&bar3);
+    //std::cout << "Thread " << threadID << " after barrier" << std::endl;
 
 
 
@@ -145,22 +145,24 @@ void* phaseThreeFour(void* arg) {
 
     qsort(assignedPartitions, sharedBlockSize, sizeof(int), quickCompare);
 
-    pthread_mutex_lock(&print_mutex);
-    std::cout << "Block size for thread[" << threadID << "]:" << sharedBlockSize << std::endl;
+    //pthread_mutex_lock(&print_mutex);
+    //std::cout << "Block size for thread[" << threadID << "]:" << sharedBlockSize << std::endl;
 
-    for(int k =0 ; k<sharedBlockSize; k++)
-    {
-        std::cout << assignedPartitions[k] << " ";
-    }
-     std::cout <<std::endl;
-    pthread_mutex_unlock(&print_mutex);
-
-
+    //for(int k =0 ; k<sharedBlockSize; k++)
+    //{
+   //     std::cout << assignedPartitions[k] << " ";
+    //}
+     //std::cout <<std::endl;
+    //pthread_mutex_unlock(&print_mutex);
 
 
 
+    //std::cout << "Thread " << threadID << " before barrier" << std::endl;
+    pthread_barrier_wait(&bar3);
+    //std::cout << "Thread " << threadID << " after barrier" << std::endl;
 
-    return NULL;
+
+    return assignedPartitions;
 }
 
 
@@ -175,11 +177,13 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    struct timeval tv0;
+    struct timezone tz0;
     struct timeval tv1;
     struct timezone tz1;
-    struct timeval tv2;
-    struct timezone tz2;
-    gettimeofday(&tv1, &tz1); // Get start time
+    struct timeval tv5;
+    struct timezone tz5;
+    gettimeofday(&tv0, &tz0); // Get start time
 
     // Set up variables
     int n = atoi(argv[1]); // Size of list
@@ -191,23 +195,79 @@ int main(int argc, char* argv[])
     int remainder = n % p; // Used to fill up blocks up to n%p with an extra key
 
 
-    //First need to create the array
-    int* a0 = new int[n];
-    std::random_device rd;
-    std::iota(a0, a0 +n, 0);
-    std::ranges::shuffle(a0, a0+n, rd);
+    // // //First need to create the array
+    // int* a0 = new int[n];
+    // std::random_device rd;
+    // std::iota(a0, a0 +n, 0);
+    // std::ranges::shuffle(a0, a0+n, rd);
     //std::cout << "Phase 0 array:" << std::endl;
-    for (int i = 0; i < n; ++i){
-       // std::cout << a0[i] << " ";
-    }
+    // for (int i = 0; i < n; ++i){
+    //    // std::cout << a0[i] << " ";
+    // }
     //std::cout << std::endl;
+    // int* a0 = new int[n];
+    // std::random_device rd;
+    // std::mt19937 g(rd());
+
+    // // Fill and shuffle in one step
+ 
+    // std::shuffle(a0, a0 + n, g);
+
+    // int* a0 = new int[n];
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_int_distribution<> dis(0, n - 1);
+    // for (int i = 0; i < n; ++i) {
+    //     a0[i] = dis(gen); // Assuming a0 is your array
+    // }
+    // for (int i = 0; i < n; ++i){
+    //     std::cout << a0[i] << " ";
+    // // }
+
+    int* a0 = new int[n];
+    std::vector<int> numbers(n);
+    std::iota(numbers.begin(), numbers.end(), 0); // Fill with 0, 1, ..., 35
+    std::random_device rd;
+    //std::mt19937 gen(rd());
+    std::minstd_rand0 gen(rd());
+
+
+    //std::cout << "Setup execution Pre-shuffle " << sec01 << " seconds and "<< msec01  << " microseconds" << std::endl;
+    std::shuffle(numbers.begin(), numbers.end(), gen);
+
+    std::copy(numbers.begin(), numbers.end(), a0);
+
+    // for (int i = 0; i < 10; ++i) {
+    //     std::cout << numbers[i] << " ";
+    // }
+
+    // Print the array
+    // for (int i = 0; i < n; ++i) {
+    //     std::cout << a0[i] << " ";
+    // }
+
+    gettimeofday(&tv1, &tz1);
+    long sec0 = tv1.tv_sec - tv0.tv_sec;
+    long msec0 = tv1.tv_usec - tv0.tv_usec;
+    if (msec0 < 0) {   
+        //Case where msec is negative, need to fix up
+        sec0= sec0 -1;
+        msec0 = msec0+ 1000000;
+    }
+    std::cout << "Setup execution time: " << sec0 << " seconds and "<< msec0  << " microseconds" << std::endl;
+    //sleep(100);
+
+
 
     // Needed info for Phase 1
     int** blocks = new int*[p];
-
     size_t * blockSizes = new size_t[p]; // may as well do this now, instead of in the parallel portions
+
+    pthread_setconcurrency(p);
     pthread_t threads[p];
     pthread_barrier_init(&bar1, NULL, p);
+
+
 
     
     /*
@@ -233,47 +293,49 @@ int main(int argc, char* argv[])
 
 
     
-    /*
-    PHASE 2: Find Pivots then Partition
-    - Thread 1 (or I suppose the first thread to grab the job) re-combines the local regular samples and sorts them again
-    - Output pivots
-    */
+    struct timeval tv2a;
+    struct timezone tz2a;
+    struct timeval tv2b;
+    struct timezone tz2b;
+    gettimeofday(&tv2a, &tz2a); // Get start time
+    
+    // PHASE 2: Find Pivots then Partition
     int* RegSamples = new int[pSq];
+
     for (int i = 0; i < p; i++) {
         int* tempRegSamp;
         if (pthread_join(threads[i], (void**)&tempRegSamp) != 0) {
             perror("Failed to JOIN a thread after phaseOne job");
         }
-        std::cout << "Regular sample [" << i << "] ";
+        //std::cout << "Regular sample [" << i << "] ";
         for (int y = 0; y < p; ++y) {
-            std::cout << tempRegSamp[y] << " ";
+            //std::cout << tempRegSamp[y] << " ";
             RegSamples[i*p+y] = tempRegSamp[y]; //LMFAO HARD CODE IN 3??????????
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
 
     }
-    for (int y = 0; y < pSq; ++y) {
-            std::cout << RegSamples[y] << " ";
-        }
-    std::cout << std::endl;
-    for (int i = 0; i < p; ++i) {
-        std::cout << "Sorted Block" << i + 1 << " of size:[" << blockSizes[i] << "]: ";
-        for (size_t j = 0; j < blockSizes[i]; ++j) {
-            std::cout << blocks[i][j] << " ";
-        }
-    std::cout << std::endl;
-    }
+    // for (int y = 0; y < pSq; ++y) {
+    //         std::cout << RegSamples[y] << " ";
+    //     }
+    //std::cout << std::endl;
+    // for (int i = 0; i < p; ++i) {
+    //     std::cout << "Sorted Block" << i + 1 << " of size:[" << blockSizes[i] << "]: ";
+    //     for (size_t j = 0; j < blockSizes[i]; ++j) {
+    //         std::cout << blocks[i][j] << " ";
+    //     }
+    // std::cout << std::endl;
+    // }
 
-    pthread_barrier_destroy(&bar1);
+
+    // std::cout << "RegSamples:\n" << "";
+    // for (int y = 0; y < pSq; ++y) {
+    //         std::cout << RegSamples[y] << " ";
+    //     }
+    //     std::cout << std::endl;
+
 
     qsort(RegSamples, pSq, sizeof(int), quickCompare);
-    std::cout << "RegSamples:\n" << "";
-    for (int y = 0; y < pSq; ++y) {
-            std::cout << RegSamples[y] << " ";
-        }
-        std::cout << std::endl;
-
-
 
     int* pivots = new int[p];
     int piv = p;
@@ -284,72 +346,96 @@ int main(int argc, char* argv[])
         pivots[i] = RegSamples[index];
         mult++;
     }
-    std::cout << "Pivots:\n" << "";
-    for (int y = 0; y < p-1; ++y) {
-            std::cout << pivots[y] << " ";
-        }
-    std::cout << std::endl;
+    // std::cout << "Pivots:\n" << "";
+    // for (int y = 0; y < p-1; ++y) {
+    //         std::cout << pivots[y] << " ";
+    //     }
+    // std::cout << std::endl;
 
-    /*
-    PHASE 3: Exchange Partitions
-    - Use pivots to split each sorted local block into partitions
-    */
+    gettimeofday(&tv2b, &tz2b);
+    long sec2 = tv2b.tv_sec - tv2a.tv_sec;
+    long msec2 = tv2b.tv_usec - tv2a.tv_usec;
+    if (msec2 < 0) {   
+        //Case where msec is negative, need to fix up
+        sec2 = sec2 -1;
+        msec2 = msec2 + 1000000;
+    }
+    std::cout << "Phases 2 execution time " << sec2 << " seconds and "<< msec2  << " microseconds" << std::endl;
 
-    // struct phaseFourStruct {
-    //     int** sharedPartitions;
-    // };
+
+
+
+
+
+    struct timeval tv3;
+    struct timezone tz3;
+    struct timeval tv4;
+    struct timezone tz4;
+    gettimeofday(&tv3, &tz3); // Get start time
+
+
+    //PHASE 3: Exchange Partitions
     int*** sharedPartitionSet = new int**[p]; // Global memory space for threads to exchange paritions
     int** sharedPartitionSizes = new int*[p]; 
     for(int s = 0; s<p ; s++) {sharedPartitionSizes[s] = new int[p];}
 
+    pthread_barrier_destroy(&bar1);
     pthread_barrier_init(&bar3, NULL, p);
     for (int i = 0; i < p; i++) {
         phaseThreeFourStruct* p34 = new phaseThreeFourStruct(blocks[i], blockSizes[i], pivots, p, sharedPartitionSet, sharedPartitionSizes, i); // Data available for each thread
         if (pthread_create(&threads[i], NULL, &phaseThreeFour, p34) != 0) {
-            perror("Failed to CREATE a thread for phaseOne job");
+            perror("Failed to CREATE a thread for phaseThreeFour job");
         }
     }
 
-    /*
-    PHASE 4: Merge Partitions
+    //PHASE 4: Merge Partitions
+    std::vector<int> outputArray(n);
+    int offset = 0;
 
-    - Partitions 1-n are given to respective threads
-    - Partitions are merged
-    - Finally, merged partitions are mergred with eachother to form sorted list
-    */
-    // int* outputArray = new int[n];
-    // for (int i = 0; i < p; i++) {
-    //     int* partition;
-    //     if (pthread_join(threads[i], (void**)&partition) != 0) {
-    //         perror("Failed to JOIN a thread after phaseOne job");
-    //     }
-    //     for (int y = 0; y < p; ++y) {
-    //         std::cout << tempRegSamp[y] << " ";
-    //         RegSamples[i*p+y] = tempRegSamp[y]; //LMFAO HARD CODE IN 3??????????
-    //     }
-    //     std::cout << std::endl;
+    for (int i = 0; i < p; i++) {
+        int* partition;
+        if (pthread_join(threads[i], (void**)&partition) != 0) {
+            perror("Failed to JOIN a thread after phaseThreeFour job");
+        }
+        int sharedBlockSize = 0;
+        for (int j = 0; j < p; j++) {sharedBlockSize += sharedPartitionSizes[j][i];}
 
-    // }
+        std::copy(partition, partition + sharedBlockSize, outputArray.begin() + offset);
+        offset += sharedBlockSize;
+        // Free the dynamically allocated memory since vector now owns the data
+        delete[] partition;
+    }   
 
 
 
-    sleep(10);
+    gettimeofday(&tv4, &tz4);
+    long sec34 = tv4.tv_sec - tv3.tv_sec;
+    long msec34 = tv4.tv_usec - tv3.tv_usec;
+    if (msec34 < 0) {   
+        //Case where msec is negative, need to fix up
+        sec34 = sec34 -1;
+        msec34 = msec34 + 1000000;
+    }
+    std::cout << "Phases 3/4 execution time " << sec34 << " seconds and "<< msec34  << " microseconds" << std::endl;
+
     pthread_barrier_destroy(&bar3);
+    //sleep(2);
+    // std::cout << "Final Output Array: ";
+    // for (int i = 0; i < n; ++i) {
+    //     std::cout << outputArray[i] << " ";
+    // }
+    // std::cout << std::endl;
+
 
     // Get end time
-    gettimeofday(&tv2, &tz2);
-    long sec = tv2.tv_sec - tv1.tv_sec;
-    long msec = tv2.tv_usec - tv1.tv_usec;
-    //Case where msec is negative, need to fix up
-    if (msec < 0) {
+    gettimeofday(&tv5, &tz5);
+    long sec = tv5.tv_sec - tv0.tv_sec;
+    long msec = tv5.tv_usec - tv0.tv_usec;
+    if (msec < 0) {   
+        //Case where msec is negative, need to fix up
         sec = sec -1;
         msec = msec + 1000000;
     }
-    std::cout << "\nPhase 5 list:" << std::endl;
-    for (int i = 0; i < n; ++i){
-       // std::cout << a0[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "\nExecution time: " << sec << " seconds and "<< msec  << " microseconds" << std::endl;
+    std::cout << "Total execution time: " << sec << " seconds and "<< msec  << " microseconds" << std::endl;
     return 0;
 }

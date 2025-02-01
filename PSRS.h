@@ -19,12 +19,21 @@ pthread_barrier_t bar4;
 
 pthread_mutex_t print_mutex;
 
+
+
+
+
+
+
+
 struct phaseOneStruct {
     int* block; // sub array to be quick sorted
-    size_t size;
+    int size;
     int w; 
     int p; 
     int pSq;
+
+
 };
 
 struct phaseThreeFourStruct {

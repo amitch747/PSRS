@@ -35,6 +35,9 @@ args for threads - https://www.youtube.com/watch?v=HDohXvS6UIk&list=PLfqABt5AS4F
 returns from threads - https://www.youtube.com/watch?v=ln3el6PR__Q&list=PLfqABt5AS4FmuQf70psXrsMLEDQXNkLq2&index=7&ab_channel=CodeVault
 
 void * to vector cast - https://stackoverflow.com/questions/22813341/void-to-vector
+
+random gen (so good) - https://stackoverflow.com/questions/9471604/what-is-the-best-way-to-generate-random-numbers-in-c
+mt19937 - https://cplusplus.com/reference/random/mt19937/
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -51,4 +54,9 @@ Looking at my 379 multithreading code I've realized I can just use a struct as t
 Saves me alot of trouble
 
 Memory is looking rough
+
+Looks rough no longer. Pretty good times (compared to whats on the PSRS paper)
+16 threads, 32000000 keys is 16 seconds.
+
+Actually really bad
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
