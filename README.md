@@ -1,20 +1,3 @@
-# Name : Aiden Mitchell
-# SID : 1658859
-# CCID : aiden2
-
-
-
-# - - - - - - - - - - - D E S I G N - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-
-
-# - - - - - - - - - - - T E S T I N G - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-
 # - - - - - - - - - - - S O U R C E S - - - - - - - - - - -
 Random number generation  - https://www.youtube.com/watch?v=oW6iuFbwPDg&ab_channel=TheBuilder
 
@@ -38,25 +21,4 @@ void * to vector cast - https://stackoverflow.com/questions/22813341/void-to-vec
 
 random gen (so good) - https://stackoverflow.com/questions/9471604/what-is-the-best-way-to-generate-random-numbers-in-c
 mt19937 - https://cplusplus.com/reference/random/mt19937/
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-
-# - - - - - - - - - - - PLANNING - - - - - - - - - - - - -
-Ok I think threadpool is not really needed. I can just assign manually before each stage. 
-Threadpool may actually be faster but I don't think itll be enough to warrant me dealing with this mess.
-
-Yeah I'm just gunna use create,join, and barriers. I don't see a reason to overcomplicate this.
-
-
-For splitting the array I think I can do a recursive function. We'll see.
-
-Looking at my 379 multithreading code I've realized I can just use a struct as the input arg for pthread_create
-Saves me alot of trouble
-
-Memory is looking rough
-
-Looks rough no longer. Pretty good times (compared to whats on the PSRS paper)
-16 threads, 32000000 keys is 16 seconds.
-
-Actually really bad
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
